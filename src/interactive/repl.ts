@@ -29,6 +29,8 @@ let g_compiledProvider = null
 
 let g_terminal: vscode.Terminal = null
 
+let last_cell_code = null
+
 export let g_connection: rpc.MessageConnection = undefined
 
 let g_juliaExecutablesFeature: JuliaExecutablesFeature
@@ -37,6 +39,34 @@ function startREPLCommand() {
     telemetry.traceEvent('command-startrepl')
 
     startREPL(false, true)
+}
+
+
+async function executeLastCell() {
+
+
+    if (last_cell_code != null) {
+        const [cellrange, code] = last_cell_code
+
+        const ed = vscode.window.activeTextEditor
+        if (ed === undefined) {
+            return
+        }
+        const doc = ed.document
+        // const curcellrange = currentCellRange(ed)
+        const curr_code = doc.getText(cellrange)
+
+        if (code === curr_code) {
+            const module: string = await modules.getModuleForEditor(ed.document, cellrange.start)
+            await evaluate(ed, cellrange, code, module)
+        } else {
+            vscode.window.showWarningMessage(
+                'There were a modification on the cached file and the last cached cell command lost it\'s cell position. Run \'Execute cell\' again on the cell you want!'
+            )
+        }
+    } else {
+        vscode.window.showInformationMessage('There is no cached cell!')
+    }
 }
 
 function is_remote_env(): boolean {
@@ -720,6 +750,9 @@ async function executeCell(shouldMove: boolean = false) {
         validateMoveAndReveal(ed, nextpos, nextpos)
     }
 
+
+    last_cell_code = [cellrange, code]
+
     await evaluate(ed, cellrange, code, module)
 }
 
@@ -1136,6 +1169,7 @@ export function activate(context: vscode.ExtensionContext, compiledProvider, jul
         registerCommand('language-julia.executeCodeBlockOrSelection', evaluateBlockOrSelection),
         registerCommand('language-julia.executeCodeBlockOrSelectionAndMove', () => evaluateBlockOrSelection(true)),
         registerCommand('language-julia.executeCell', executeCell),
+        registerCommand('language-julia.executeLastCell', executeLastCell),
         registerCommand('language-julia.executeCellAndMove', () => executeCell(true)),
         registerCommand('language-julia.moveCellUp', moveCellUp),
         registerCommand('language-julia.moveCellDown', moveCellDown),
