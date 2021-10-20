@@ -45,19 +45,13 @@ function startREPLCommand() {
 async function executeLastCell() {
 
 
-    if (last_cell_code != null) {
-        const [cellrange, code] = last_cell_code
+    if (last_cell_code !== null) {
+        const [cellrange, ed, doc, code] = last_cell_code
 
-        const ed = vscode.window.activeTextEditor
-        if (ed === undefined) {
-            return
-        }
-        const doc = ed.document
-        // const curcellrange = currentCellRange(ed)
         const curr_code = doc.getText(cellrange)
 
         if (code === curr_code) {
-            const module: string = await modules.getModuleForEditor(ed.document, cellrange.start)
+            const module: string = await modules.getModuleForEditor(doc, cellrange.start)
             await evaluate(ed, cellrange, code, module)
         } else {
             vscode.window.showWarningMessage(
@@ -751,7 +745,7 @@ async function executeCell(shouldMove: boolean = false) {
     }
 
 
-    last_cell_code = [cellrange, code]
+    last_cell_code = [cellrange, ed, doc, code]
 
     await evaluate(ed, cellrange, code, module)
 }
