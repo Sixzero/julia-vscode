@@ -270,6 +270,11 @@
                 "title": "Julia: Execute Code Cell in REPL"
             },
             {
+                "command": "language-julia.executeLastCell",
+                "title": "Julia: Execute Last Code Cell"
+
+            },
+            {
                 "command": "language-julia.executeCellAndMove",
                 "title": "Julia: Execute Code Cell in REPL and Move"
             },

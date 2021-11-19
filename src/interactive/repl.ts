@@ -28,6 +28,8 @@ let g_compiledProvider = null
 
 let g_terminal: vscode.Terminal = null
 
+let last_cell_code = null
+
 export let g_connection: rpc.MessageConnection = undefined
 
 let g_terminal_is_persistent: boolean = false
@@ -43,13 +45,20 @@ function startREPLCommand() {
 let last_cell_code = null;
 async function executeLastCell() {
 
-    if (last_cell_code !== null) {
-        const [cellrange, ed, doc, code] = last_cell_code
 
+    if (last_cell_code != null) {
+        const [cellrange, code] = last_cell_code
+
+        const ed = vscode.window.activeTextEditor
+        if (ed === undefined) {
+            return
+        }
+        const doc = ed.document
+        // const curcellrange = currentCellRange(ed)
         const curr_code = doc.getText(cellrange)
 
         if (code === curr_code) {
-            const module: string = await modules.getModuleForEditor(doc, cellrange.start)
+            const module: string = await modules.getModuleForEditor(ed.document, cellrange.start)
             await evaluate(ed, cellrange, code, module)
         } else {
             vscode.window.showWarningMessage(
@@ -1331,6 +1340,7 @@ export function activate(context: vscode.ExtensionContext, compiledProvider, jul
         registerCommand('language-julia.executeCodeBlockOrSelection', evaluateBlockOrSelection),
         registerCommand('language-julia.executeCodeBlockOrSelectionAndMove', () => evaluateBlockOrSelection(true)),
         registerCommand('language-julia.executeCell', executeCell),
+        registerCommand('language-julia.executeLastCell', executeLastCell),
         registerCommand('language-julia.executeCellAndMove', () => executeCell(true)),
         registerCommand('language-julia.moveCellUp', moveCellUp),
         registerCommand('language-julia.moveCellDown', moveCellDown),
