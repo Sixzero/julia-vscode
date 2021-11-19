@@ -39,6 +39,28 @@ function startREPLCommand() {
     startREPL(false, true)
 }
 
+
+async function executeLastCell() {
+
+
+    if (last_cell_code !== null) {
+        const [cellrange, ed, doc, code] = last_cell_code
+
+        const curr_code = doc.getText(cellrange)
+
+        if (code === curr_code) {
+            const module: string = await modules.getModuleForEditor(doc, cellrange.start)
+            await evaluate(ed, cellrange, code, module)
+        } else {
+            vscode.window.showWarningMessage(
+                'There were a modification on the cached file and the last cached cell command lost it\'s cell position. Run \'Execute cell\' again on the cell you want!'
+            )
+        }
+    } else {
+        vscode.window.showInformationMessage('There is no cached cell!')
+    }
+}
+
 function is_remote_env(): boolean {
     return typeof vscode.env.remoteName !== 'undefined'
 }
@@ -719,6 +741,9 @@ async function executeCell(shouldMove: boolean = false) {
         const nextpos = new vscode.Position(nextCellBorder(doc, cellrange.end.line + 1, true, isJmd) + 1, 0)
         validateMoveAndReveal(ed, nextpos, nextpos)
     }
+
+
+    last_cell_code = [cellrange, ed, doc, code]
 
     await evaluate(ed, cellrange, code, module)
 }
