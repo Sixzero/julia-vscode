@@ -48,6 +48,7 @@
         "onCommand:language-julia.nextProfile",
         "onCommand:language-julia.previousProfile",
         "onCommand:language-julia.executeCell",
+        "onCommand:language-julia.executeLastCell",
         "onCommand:language-julia.executeJuliaBlockInREPL",
         "onCommand:language-julia.selectBlock",
         "onCommand:language-julia.moveCellUp",
@@ -278,6 +279,11 @@
             {
                 "command": "language-julia.executeCell",
                 "title": "Julia: Execute Code Cell in REPL"
+            },
+            {
+                "command": "language-julia.executeLastCell",
+                "title": "Julia: Execute Last Code Cell"
+
             },
             {
                 "command": "language-julia.executeCellAndMove",

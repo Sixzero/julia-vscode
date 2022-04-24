@@ -28,6 +28,8 @@ let g_compiledProvider = null
 
 let g_terminal: vscode.Terminal = null
 
+let last_cell_code = null
+
 export let g_connection: rpc.MessageConnection = undefined
 
 let g_juliaExecutablesFeature: JuliaExecutablesFeature
@@ -1260,6 +1262,7 @@ export function activate(context: vscode.ExtensionContext, compiledProvider, jul
         registerCommand('language-julia.executeCodeBlockOrSelection', evaluateBlockOrSelection),
         registerCommand('language-julia.executeCodeBlockOrSelectionAndMove', () => evaluateBlockOrSelection(true)),
         registerCommand('language-julia.executeCell', executeCell),
+        registerCommand('language-julia.executeLastCell', executeLastCell),
         registerCommand('language-julia.executeCellAndMove', () => executeCell(true)),
         registerCommand('language-julia.moveCellUp', moveCellUp),
         registerCommand('language-julia.moveCellDown', moveCellDown),
