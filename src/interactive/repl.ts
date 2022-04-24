@@ -37,6 +37,28 @@ function startREPLCommand() {
 
     startREPL(false, true)
 }
+
+
+async function executeLastCell() {
+
+
+    if (last_cell_code !== null) {
+        const [cellrange, ed, doc, code] = last_cell_code
+
+        const curr_code = doc.getText(cellrange)
+
+        if (code === curr_code) {
+            const module: string = await modules.getModuleForEditor(doc, cellrange.start)
+            await evaluate(ed, cellrange, code, module)
+        } else {
+            vscode.window.showWarningMessage(
+                'There were a modification on the cached file and the last cached cell command lost it\'s cell position. Run \'Execute cell\' again on the cell you want!'
+            )
+        }
+    } else {
+        vscode.window.showInformationMessage('There is no cached cell!')
+    }
+}
 async function confirmKill() {
     if (vscode.workspace.getConfiguration('julia').get<boolean>('persistentSession.warnOnKill') === false) {
         return true
@@ -793,6 +815,7 @@ async function executeCell(shouldMove: boolean = false) {
         validateMoveAndReveal(ed, nextpos, nextpos)
     }
 
+    last_cell_code = [cellrange, ed, doc, code]
     const connection_available = await evaluate(ed, cellrange, code, module)
 
     if (!connection_available) {
